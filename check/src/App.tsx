@@ -4,6 +4,7 @@ import React from "react";
 //yarn add react-qr-reader
 //yarn add tesseract.js
 
+//if want to check the receipt pleass  set the CurrentDayNumber currentNumberDay and currentDay
 import QrReader from "react-qr-reader";
 import "./App.css";
 import { createWorker } from "tesseract.js";
@@ -18,17 +19,17 @@ function App() {
     height: 0,
   };
   const [textResult, setTextResult] = React.useState([""]) as any;
-  const [CurrentDayNumber, setCurrentDayNumber] = React.useState("0");
-  const qrCodeSet = {
+  // const [CurrentDayNumber, setCurrentDayNumber] = React.useState("239");
+  const [qrCodeSet, setQrcodeset] = React.useState({
     qrCodeSet1: "0039000600000101030040218",
     qrCodeSet3: "5102TH9104",
-    currentNumdayDay: "",
-    currentday: "",
+    currentNumberDay: "239",
+    currentday: "27",
     dayNumber: "",
     timeHours: "",
     timeMin: "",
     CodeRef: "",
-  };
+  });
   const qrRef = React.useRef(null) as any;
 
   const [isLoading, setLoading] = React.useState(false);
@@ -86,7 +87,7 @@ function App() {
       console.log("current number day", currentDayNumber);
       console.log("curernt day number", day);
 
-      setCurrentDayNumber(currentDayNumber);
+      //setCurrentDayNumber(currentDayNumber);
 
       const qrCodeStr1 = result.slice(0, 25); //qrcode set 1
       const qrCodeRef = result.slice(25, 43); //qrcode set 2 timestamp
@@ -96,22 +97,20 @@ function App() {
       const dayScan = qrCodeRef.slice(3, 6);
       const timeScan = qrCodeRef.slice(6, 10);
 
-      // console.log("day scan from qrcode", dayScan);
-      // console.log("time scan from qrcode", timeScan);
+      //Comment here to check
+      //qrCodeSet.currentNumberDay = currentDayNumber;
+      //qrCodeSet.currentday = day;
 
-      qrCodeSet.currentNumdayDay = currentDayNumber;
-      qrCodeSet.currentday = day;
       qrCodeSet.dayNumber = dayScan;
       qrCodeSet.timeHours = timeScan.slice(0, 2);
       qrCodeSet.timeMin = timeScan.slice(2, 4);
-      // console.log("qrcode set", qrCodeSet);
 
       await worker1.load();
       await worker1.loadLanguage("eng");
       await worker1.initialize("eng");
       const values = [];
       const textfilter = [] as any;
-      //console.log("box top", boxSize[0].top);
+
       for (let i = 0; i < boxSize.length; i++) {
         const {
           data: { text },
@@ -128,20 +127,28 @@ function App() {
       // console.log("text scan", values);
       // console.log("text filter", textfilter);
 
-      setTextResult(textfilter);
+      await setTextResult(textfilter);
     }
   };
 
   if (textResult) {
-    // console.log("day number today", qrCodeSet.currentNumdayDay);
-    // console.log("day number scan", qrCodeSet.dayNumber);
-    // console.log("text scan time", textResult[0][2]);
-    // console.log("text qr time", qrCodeSet.timeHours);
+    console.log("day scan image", textResult[0][0]);
+    console.log("day number today", qrCodeSet.currentday);
+
+    console.log("text scan time", textResult[0][2]);
+    console.log("text qr time", qrCodeSet.timeHours);
+
+    console.log("text scan min", textResult[0][3]);
+    console.log("text qr scan min", qrCodeSet.timeMin);
+
+    console.log("day number scan", qrCodeSet.dayNumber);
+    console.log("day current", qrCodeSet.currentNumberDay);
+
     if (
       textResult[0][0] === qrCodeSet.currentday &&
       textResult[0][2] === qrCodeSet.timeHours &&
       textResult[0][3] === qrCodeSet.timeMin &&
-      qrCodeSet.currentday === CurrentDayNumber
+      qrCodeSet.dayNumber === qrCodeSet.currentNumberDay
     ) {
       // console.log("success date");
       check.date = "true";
@@ -150,7 +157,6 @@ function App() {
       check.date = "false";
     }
   }
-  //const showResult = textResult[0];
 
   return (
     <div
